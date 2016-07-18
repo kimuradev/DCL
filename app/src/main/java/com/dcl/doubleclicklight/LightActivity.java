@@ -1,24 +1,20 @@
 package com.dcl.doubleclicklight;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
-import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.ImageButton;
+import android.widget.Toast;
 import android.widget.ToggleButton;
-
-import java.security.Policy;
 
 /**
  * Created by Leandro on 17/07/2016.
  */
-class LightActivity extends Activity {
-    //private ImageButton btnSwitch;
+class LightActivity extends ActionBarActivity {
     private ToggleButton toggleButton;
     private Camera camera;
     private boolean isFlashOn;
@@ -29,8 +25,13 @@ class LightActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+        }
+
         // flash switch button
-        //btnSwitch = (ImageButton) findViewById(R.id.btnSwitch);
         toggleButton = (ToggleButton) findViewById(R.id.toggleButton1);
 
         hasFlash = getApplicationContext().getPackageManager()
@@ -65,78 +66,77 @@ class LightActivity extends Activity {
             }
         });
     }
-
-    // getting camera parameters
-    private void getCamera() {
-        if (camera == null) {
-            try {
-                camera = Camera.open();
-                params = camera.getParameters();
-            } catch (RuntimeException e) {
-                Log.e("Camera Error. Failed to Open. Error: ", e.getMessage());
-            }
-        }
-    }
-
     /*
-* Turning On flash
-*/
+    * Turning On flash
+    */
     private void turnOnFlash() {
         if (!isFlashOn) {
-            /*if (camera == null || params == null) {
-                return;
-            }*/
-            if (camera == null) {
-                camera = Camera.open();
-            }
-            // play sound
-            //playSound();
-
-            params = camera.getParameters();
-            params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-            camera.setParameters(params);
-            camera.startPreview();
-            isFlashOn = true;
-
-            // changing button/switch image
-            toggleButtonImage();
-        }
-    }
-
-    private void toggleButtonImage() {
-                if (toggleButton.isChecked()) {
-                    //Button is ON
-                    // set background as ON
-                    toggleButton.setBackgroundResource(R.drawable.power_button_on);
-                    // call method to turn ON the lights
-                } else{
-                    //Button is OFF
-                    // set background as OFF
-                    toggleButton.setBackgroundResource(R.drawable.power_button_off);
-                    // call method to turn OFF the lights
+            try {
+                if (camera == null) {
+                    camera = Camera.open();
                 }
+                params = camera.getParameters();
+                params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+                camera.setParameters(params);
+                camera.startPreview();
+                isFlashOn = true;
+                // changing button/switch image
+                toggleButtonImage();
+            }catch (Exception e){
+                e.printStackTrace();
+                Toast.makeText(getBaseContext(), "Some Exception has occured. Please contact us. ",
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void turnOffFlash() {
         if (isFlashOn) {
-            /*if (camera == null || params == null) {
-                return;
-            }*/
-            if (camera == null) {
-                camera = Camera.open();
+            try{
+                if (camera == null) {
+                    camera = Camera.open();
+                }
+                params = camera.getParameters();
+                params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+                camera.setParameters(params);
+                camera.stopPreview();
+                isFlashOn = false;
+                // changing button/switch image
+                toggleButtonImage();
+            }catch (Exception e){
+                e.printStackTrace();
+                Toast.makeText(getBaseContext(), "Some Exception has occured. Please contact us. ",
+                        Toast.LENGTH_SHORT).show();
             }
-            // play sound
-            //playSound();
-
-            params = camera.getParameters();
-            params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-            camera.setParameters(params);
-            camera.stopPreview();
-            isFlashOn = false;
-
-            // changing button/switch image
-            toggleButtonImage();
         }
+    }
+
+    private void toggleButtonImage() {
+        if (toggleButton.isChecked()) {
+            //Button is ON
+            // set background as ON
+            toggleButton.setBackgroundResource(R.drawable.power_button_on);
+            // call method to turn ON the lights
+        } else{
+            //Button is OFF
+            // set background as OFF
+            toggleButton.setBackgroundResource(R.drawable.power_button_off);
+            // call method to turn OFF the lights
+        }
+    }
+
+    private void releaseCamera(){
+        if (camera != null){
+            camera.release();
+            camera = null;
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        releaseCamera();
+
     }
 }
 
