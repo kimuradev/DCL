@@ -14,7 +14,7 @@ import android.widget.ToggleButton;
 /**
  * Created by Leandro on 17/07/2016.
  */
-class LightActivity extends ActionBarActivity {
+public class LightActivity extends ActionBarActivity {
     private ToggleButton toggleButton;
     private Camera camera;
     private boolean isFlashOn;
